@@ -1,10 +1,10 @@
-import numpy as np
 from sympy import Matrix
+import sympy
 from scipy.optimize import linprog
 #C6H12O6 + O2 = H2O + CO2
 
 from parse_input import take_input
-from homogenous_diophantines import solve_diphantine
+from diophantine_methods import solve_diphantine, solve_inequality
 from math import gcd
 #NH3 + MnO4- + H+ = NO2 + Mn 2+ + H2O
 def display_solution(LH, RH, v):
@@ -51,8 +51,6 @@ def main():
                 entries[i][j] = -RH[j-len(LH)][key]
     A = Matrix(entries)
 
-    b = Matrix([0 for _ in range(m)])
-
     xarr = solve_diphantine(A)
 
     if len(xarr) == 0:
@@ -63,12 +61,18 @@ def main():
         display_solution(LH, RH, xarr[0])
         return
     print("Reacton may not be uniquely balanced. Dimension of solution lattice is ", len(xarr))
+
     display_solution(LH, RH, xarr[0])
     elems = [[0 for _ in range(len(xarr))] for _ in range(A.cols)]
     for j, v in enumerate(xarr):
         for i in range(v.rows):
             elems[i][j] = v[i, 0]
     W = Matrix(elems)
+    b = sympy.ones(A.cols)
+
+    karr = solve_inequality(W, b)
+    x = W@karr
+    display_solution(LH, RH, x)
 
 
 

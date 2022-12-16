@@ -1,8 +1,16 @@
-from sympy import Matrix
+from sympy import Matrix, Abs
 from typing import Tuple
 import numpy as np
 from hsnf import smith_normal_form
 import scipy
+from math import lcm, ceil, floor
+
+class NoSolutionError(Exception):
+    pass
+
+def good_ceil(x):
+    if x>= 0: return ceil(x)
+    return floor(x)
 
 def get_canonical_smith(R: Matrix) -> Tuple[Matrix, Matrix, Matrix]:
     """
@@ -56,6 +64,9 @@ def solve_diphantine(A: Matrix):
         res.append(W.col(col_index))
 
     return res        
+
+
+
 
 
 
