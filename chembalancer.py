@@ -1,12 +1,14 @@
 from sympy import Matrix
 import sympy
-from scipy.optimize import linprog
+#Example formulas
+#NH3 + MnO4- + H+ = NO2 + Mn 2+ + H2O
 #C6H12O6 + O2 = H2O + CO2
 
 from parse_input import take_input
-from diophantine_methods import solve_diphantine, solve_inequality
+from diophantine_methods import solve_diophantine
+from inequality_CRA import discrete_CRA
 from math import gcd
-#NH3 + MnO4- + H+ = NO2 + Mn 2+ + H2O
+
 def display_solution(LH, RH, v):
 
     counts = [v[i, 0] for i in range(v.rows)]
@@ -15,15 +17,15 @@ def display_solution(LH, RH, v):
     outp = ""
     for i in range(len(LH)):
         count = counts[i]
-        if count == 1: count = None
-        outp += f"{count} {LH[i]}"
+        if count == 1: outp += f"{LH[i]}"
+        else: outp += f"{count} {LH[i]}"
         if i < len(LH) - 1:
             outp += " + "
     outp += " -> "
     for i in range(len(RH)):
         count = counts[i + len(LH)]
-        if count == 1: count == None
-        outp += f"{count} {RH[i]}"
+        if count == 1: outp += f"{LH[i]}"
+        else: outp += f"{count} {RH[i]}"
         if i < len(RH) - 1:
             outp += " + "
 
@@ -51,7 +53,7 @@ def main():
                 entries[i][j] = -RH[j-len(LH)][key]
     A = Matrix(entries)
 
-    xarr = solve_diphantine(A)
+    xarr = solve_diophantine(A)
 
     if len(xarr) == 0:
         print('No way to balance equation!!!')
@@ -62,16 +64,19 @@ def main():
         return
     print("Reacton may not be uniquely balanced. Dimension of solution lattice is ", len(xarr))
 
-    display_solution(LH, RH, xarr[0])
     elems = [[0 for _ in range(len(xarr))] for _ in range(A.cols)]
     for j, v in enumerate(xarr):
         for i in range(v.rows):
             elems[i][j] = v[i, 0]
     W = Matrix(elems)
-    b = sympy.ones(A.cols)
+    b = sympy.ones(A.cols, 1)
 
-    karr = solve_inequality(W, b)
+    karr = discrete_CRA(W, b)
+    if karr == None:
+        print("No positive solution could be found. The lattice is spanned by ", xarr, " Perhaps the reader is more succesfull in finding a positive solution.")
+        return
     x = W@karr
+    print("A solution was found. It may not be the only one however.")
     display_solution(LH, RH, x)
 
 

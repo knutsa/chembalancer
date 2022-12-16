@@ -8,10 +8,6 @@ from math import lcm, ceil, floor
 class NoSolutionError(Exception):
     pass
 
-def good_ceil(x):
-    if x>= 0: return ceil(x)
-    return floor(x)
-
 def get_canonical_smith(R: Matrix) -> Tuple[Matrix, Matrix, Matrix]:
     """
         R -> Q, S, P,
@@ -20,20 +16,21 @@ def get_canonical_smith(R: Matrix) -> Tuple[Matrix, Matrix, Matrix]:
         calculates smith matrix S with all off diagonal entries zero and diagonal entries ai being positive integers s.t ai |a(i+1).
         P and Q are unit (invertible) integer matrices
     """
-    #trying to install hsnf instead
-    pass
+    #Might implement this later for fun! :)
+    #But Hsnf module already has it implemented
 
 def verify_smith(D, L, R, A):
     assert (L@A@R == D).all(), "smith error"
     last = D[0,0]
-    for ii in range(max(A.shape)):
-        if ii >= min(A.shape) or D[ii,ii] == 0: break
-        assert D[ii, ii] % last == 0, "smith error"
+    for ii in range(min(A.shape)):
+        if last != 0:
+            assert D[ii, ii] % last == 0, "smith error"
         last = D[ii, ii]
 
-def solve_diphantine(A: Matrix):
+def solve_diophantine(A: Matrix):
     "Returns integer vectors, v1, .. vk spanning the solution space for the homogenous equation Ax = 0"
-    Anp = np.array(A)
+    #Anp = np.array([int(ai) for ai in A]).reshape(A.shape)
+    Anp = np.array([[int(A[i, j]) for j in range(A.cols)] for i in range(A.rows)])
     D, L, R = smith_normal_form(Anp)
     verify_smith(D, L, R, Anp)
 
@@ -44,8 +41,8 @@ def solve_diphantine(A: Matrix):
     S = Matrix(D) #SymPy matrix
     P, Q = Matrix(L), Matrix(R)
     elems = [[0 for j in range(S.cols)] for i in range(S.rows)]
-    for ii in range(max(S.cols, S.rows)):
-        if ii >= min(S.cols, S.rows) or S[ii, ii] == 0: break
+    for ii in range(min(S.cols, S.rows)):
+        if S[ii, ii] == 0: break
 
         elems[ii][ii] = 1 / S[ii, ii]
 
@@ -63,17 +60,18 @@ def solve_diphantine(A: Matrix):
     for col_index in pivots:
         res.append(W.col(col_index))
 
-    return res        
+    for x in res:
+        assert x.norm() > 0
+        y = A@x
+        for yi in y:
+            assert yi == 0, "Numerical error. Most likely input matrix is too large."
 
-
-
-
-
+    return res
 
 
 if __name__ == '__main__':
     A_test = Matrix([[1,-2], [2,-4]])
-    res = solve_diphantine(A_test)
+    res = solve_diophantine(A_test)
 
     print("Hrere we go!!")
     print(res)

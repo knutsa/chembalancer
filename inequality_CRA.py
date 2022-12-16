@@ -2,9 +2,10 @@ import sympy
 from sympy import Matrix, Abs, ImmutableMatrix
 from collections import defaultdict
 from math import floor, ceil
+import time
 
 
-def CRA(A: Matrix, b : Matrix):
+def discrete_CRA(A: Matrix, b : Matrix)->Matrix:
     """
         Solve Ax >= b
 
@@ -22,11 +23,12 @@ def CRA(A: Matrix, b : Matrix):
                 inequality[j, 0] = A[i, j] #j is level of term lowest to the left highest to the right
         inequality[n, 0] = -b[i, 0]
         ak = inequality[level, 0]
+        if ak == 0: continue
         inequality = ImmutableMatrix([ai / Abs(ak) for ai in inequality])
         S[level].add(inequality)
 
 
-    level = lambda c : min([i for i in range(c.cols) if c[i, 0] != 0])
+    level = lambda c : min([i for i in range(c.rows) if c[i, 0] != 0] + [n])
     def get_L(S, x, k):
         L, p = -sympy.oo, None
         for ineq in S[k]:
@@ -34,7 +36,7 @@ def CRA(A: Matrix, b : Matrix):
             if ak == 1:
                 if -x.dot(ineq) + x[k]*ineq[k] > L:
                     L = -x.dot(ineq) + x[k]*ineq[k]
-                    p = ineq
+                    p = Matrix(ineq)
 
         return L, p
     def get_U(S, x, k):
@@ -42,9 +44,9 @@ def CRA(A: Matrix, b : Matrix):
         for ineq in S[k]:
             ak = ineq[k]; assert ak in (1,-1)
             if ak == -1:
-                if x.dot(ineq) - x[k]*ineq[k] > L:
-                    L = x.dot(ineq) - x[k]*ineq[k]
-                    q = ineq
+                if x.dot(ineq) - x[k]*ineq[k] < U:
+                    U = x.dot(ineq) - x[k]*ineq[k]
+                    q = Matrix(ineq)
 
         return U, q
 
@@ -52,7 +54,9 @@ def CRA(A: Matrix, b : Matrix):
         if U == sympy.oo and L == -sympy.oo: return 0
         if U == sympy.oo: return ceil(L)
         if L == -sympy.oo: return floor(U)
-        return (L + U) // 2
+        res = (L + U) // 2
+        if L <= res <= U: return res
+        return res+1
 
     for ineq in S[n]: #may contain contradictions
         if ineq[n] < 0: return None
@@ -61,18 +65,19 @@ def CRA(A: Matrix, b : Matrix):
     x[-1] = 1 #cannot modify
     x = Matrix(x)
     k = n-1
+    start = time.time()
     while k >= 0:
         constraint_status = [x.dot(ineq) >= 0 for ineq in S[k] ]
         if False in [x.dot(ineq) >= 0 for ineq in S[k] ]:
             L, p = get_L(S, x, k) #get lower bound
             U, q = get_U(S, x, k) #get upper bound
-            while  U < L +1: #need distance >= 1 to guarantee integer values in interval
-                if x.dot(p+q) < 1:
-                    k = level(p+q)
-                    r = p+q
-                    to_add = ImmutableMatrix(r / r[level(r), 0])
-                    S[k].add(to_add)
+            while  U - L<1: #need distance >= 1 to guarantee integer values in interval
+                k = level(p+q)
+                r = p+q; r[n, 0] -= 1
+                to_add = ImmutableMatrix(r / Abs(r[level(r), 0])) #Normalize ineq, don't use negative values!!!!!!!
+                S[k].add(to_add)
                 if k == n: return None
+                #if time.time() - start > time_limit: return None
                 L, p = get_L(S, x, k) #get lower bound
                 U, q = get_U(S, x, k) #get upper bound
             
@@ -88,3 +93,4 @@ def CRA(A: Matrix, b : Matrix):
         assert(yi >= bi), f"{yi}, {bi} not good"
 
     return  x
+
