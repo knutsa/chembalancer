@@ -1,4 +1,4 @@
-# chembalancer
+# Chembalancer
 A common task in chemistry class is to balance a chemical reaction.Typically, the substances on each side of the reaction are given and the challenge is to find integer coefficients in front of every substance to make the reaction balanced. This code does just that!!!
 
 ## Example usecase:
