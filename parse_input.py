@@ -70,7 +70,7 @@ def take_input()-> 'tuple[list, list]':
     reaction_pattern = f"^(?P<LH>{reaction_side_pattern})\s*=\s*(?P<RH>{reaction_side_pattern})$"
 
     while True:
-        reaction = input("Enter reaction formula:")
+        reaction = input("Enter reaction formula:\n")
         reaction = reaction.rstrip()
 
         try:

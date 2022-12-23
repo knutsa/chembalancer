@@ -9,9 +9,14 @@ from diophantine_methods import solve_diophantine
 from inequality_CRA import discrete_CRA
 from math import gcd
 
-def display_solution(LH, RH, v):
+def display_solution(LH: list, RH: list, v: Matrix):
 
     counts = [v[i, 0] for i in range(v.rows)]
+    if min(counts) < 1:
+        counts = [-count for count in counts]
+    if min(counts) < 1:
+        print("No proper solution found!")
+        return
     d = gcd(*counts)
     counts = [count // d for count in counts]  
     outp = ""
