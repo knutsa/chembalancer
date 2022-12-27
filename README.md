@@ -19,6 +19,7 @@ NH3 + MnO4- + H+ = NO2 + Mn 2+ + H2O
 Reaction is uniquely balanced
 5 NH3 + 7 MnO4- + 21 H+ -> 5 NO2 + 7 Mn 2+ + 18 H2O
 ```
+(this balances the redox reaction 5 NH<sub>3</sub> + 7 MnO<sub>4</sub><sup>-</sup> + 21 H<sup>+</sup> -> 5 NO<sub>2</sub> + 7 Mn<sup>2+</sup> + 18 H<sub>2</sub>O)
 ## Setup
 1. Install `pipenv`
 2. Install dependencies by running `pipenv install`
