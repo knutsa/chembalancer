@@ -12,7 +12,13 @@ C6H12O6 + O2 = H2O + CO2
 Reaction is uniquely balanced
 C6H12O6 + 6 O2 -> 6 H2O + 6 CO2
 ```
-
+Another example output:
+```
+Enter reaction formula:
+NH3 + MnO4- + H+ = NO2 + Mn 2+ + H2O
+Reaction is uniquely balanced
+5 NH3 + 7 MnO4- + 21 H+ -> 5 NO2 + 7 Mn 2+ + 18 H2O
+```
 ## Setup
 1. Install `pipenv`
 2. Install dependencies by running `pipenv install`
